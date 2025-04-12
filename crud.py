@@ -31,7 +31,7 @@ def obtener_usuario_id(db:Session,usuario_id:int):
 
 # Crear actividades 
 def crear_actividad(db:Session,actividad:Actividadescrear):
-    nueva_actividad = Actividades(nombre_actividad = actividad.nombre_actividades,
+    nueva_actividad = Actividades(nombre_actividad = actividad.nombre_actividad,
                                 descripcion = actividad.descripcion,
                                 estado = actividad.estado,
                                 Usuarios_id= actividad.Usuarios_id)
