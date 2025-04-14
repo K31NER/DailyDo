@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/images/logo.svg" type="image/svg+xml">
+    <title>DailyDo - Control de Actividades Diarias</title>
+    <style>
+        /* --- TU CSS EXISTENTE VA AQUÍ --- */
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --header-color: #58b0f0;
+            --button-hover: #28a745;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #2980b9;
+                --secondary-color: #27ae60;
+                --background-color: #121212;
+                --card-background: #1e1e1e;
+                --text-color: #e0e0e0;
+                --border-color: #333333;
+                --header-color: #2573a7;
+                --button-hover: #219a3a;
+                --shadow-color: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 20px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            background-color: var(--card-background);
+            border: 3px solid var(--border-color);
+            animation: pop-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--card-background);
+            border-bottom: 3px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .logo img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            max-width: 400px;
+            margin-left: 20px;
+            background-color: var(--background-color);
+            border-radius: 30px;
+            padding: 8px 15px;
+            border: 2px solid var(--border-color);
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+            border: none;
+            background: transparent;
+            padding: 5px;
+            font-family: var(--font-family);
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-bar button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 20px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--card-background);
+        }
+
+        .add-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: var(--font-family);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+
+        .add-button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .add-button span { /* Era i antes */
+            margin-right: 8px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th {
+            background-color: var(--header-color);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: bold;
+            position: relative;
+            border-bottom: 3px solid var(--border-color);
+        }
+
+        th:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 25%;
+            height: 50%;
+            width: 2px;
+            background-color: var(--border-color);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            word-break: break-word;
+        }
+
+        tr:hover {
+            background-color: var(--background-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .action-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            transition: transform 0.2s;
+            color: var(--text-color);
+        }
+
+        .action-button:hover {
+            transform: scale(1.2);
+        }
+
+        .edit-button:hover {
+            color: #f39c12;
+        }
+
+        .delete-button:hover {
+            color: #e74c3c;
+        }
+
+        .complete-button:hover {
+            color: #2ecc71;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status-pending {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .status-completed {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        /* Eliminamos status-in-progress ya que el backend solo tiene boolean */
+        /* .status-in-progress {
+            background-color: #3498db;
+            color: white;
+        } */
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .close-button {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .form-buttons button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: var(--font-family);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cancel-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+        }
+
+        .submit-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+        }
+
+        .cancel-button:hover {
+            background-color: #c0392b;
+        }
+
+        .submit-button:hover {
+            background-color: var(--button-hover);
+        }
+
+        .empty-state {
+            display: none; /* Oculto por defecto, se muestra desde JS */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .empty-state svg { /* Era img antes */
+            width: 150px;
+            height: 150px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .empty-state p {
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        /* Animaciones (Sin cambios) */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+        @keyframes pop-in {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes slide-in {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        tr { animation: slide-in 0.3s ease-out forwards; opacity: 0; }
+        tr:nth-child(1) { animation-delay: 0.1s; }
+        tr:nth-child(2) { animation-delay: 0.2s; }
+        tr:nth-child(3) { animation-delay: 0.3s; }
+        tr:nth-child(4) { animation-delay: 0.4s; }
+        tr:nth-child(5) { animation-delay: 0.5s; }
+
+        /* Estilos responsivos (Sin cambios) */
+         @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 15px; }
+            .search-bar { max-width: 100%; margin-left: 0; }
+            th, td { padding: 10px 8px; font-size: 14px; }
+            .action-buttons { flex-direction: column; gap: 5px; }
+            .col-description { display: none; }
+        }
+        @media (max-width: 480px) {
+            .container { margin: 10px auto; }
+            .add-button { padding: 8px 15px; font-size: 14px; }
+            th:nth-child(3), td:nth-child(3) { display: none; } /* Oculta Estado */
+            th:nth-child(2), td:nth-child(2) { display: none; } /* Oculta Descripción */
+            .modal-content { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="/static/images/logo.svg" alt="DailyDo Logo" width="50" height="50">
+                <span>DailyDo</span>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar..." id="search-input">
+                <button id="search-button">🔍</button>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="add-button" id="add-activity-button">
+                <span>➕</span> Agregar actividades
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%">Actividad</th>
+                        <th style="width: 30%" class="col-description">Descripción</th>
+                        <th style="width: 15%">Estado</th>
+                        <th style="width: 15%">Creado</th> <!-- Cambiado de Fecha -->
+                        <th style="width: 15%">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="activity-table-body">
+                    <!-- Las actividades se cargarán dinámicamente aquí -->
+                </tbody>
+            </table>
+
+             <div id="empty-state" class="empty-state">
+                <svg width="150" height="150" viewBox="0 0 200 200">
+                    <rect x="40" y="60" width="120" height="80" rx="10" fill="#e0e0e0" />
+                    <line x1="60" y1="80" x2="140" y2="80" stroke="#a0a0a0" stroke-width="5" stroke-linecap="round" />
+                    <line x1="60" y1="100" x2="120" y2="100" stroke="#a0a0a0" stroke-width="5" stroke-linecap="round" />
+                    <line x1="60" y1="120" x2="100" y2="120" stroke="#a0a0a0" stroke-width="5" stroke-linecap="round" />
+                    <circle cx="100" cy="100" r="60" fill="none" stroke="#e0e0e0" stroke-width="5" stroke-dasharray="10 5" />
+                </svg>
+                <h3>Sin actividades</h3>
+                <p>Parece que aún no tienes ninguna actividad. ¡Comienza agregando una!</p>
+                <button class="add-button" id="empty-add-button">
+                    <span>➕</span> Agregar mi primera actividad
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar actividades -->
+    <div class="modal" id="activity-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Agregar Actividad</h2>
+                <button class="close-button" id="close-modal">×</button>
+            </div>
+
+            <form id="activity-form">
+                <input type="hidden" id="activity-id">
+                <!-- ¡¡IMPORTANTE!! Necesitamos el ID del usuario -->
+                <!-- Como no hay login, lo hardcodearemos en JS por ahora -->
+                <!-- <input type="hidden" id="user-id" value="1"> -->
+
+                <div class="form-group">
+                    <label for="activity-name">Nombre de la Actividad</label>
+                    <input type="text" id="activity-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="activity-description">Descripción</label>
+                    <textarea id="activity-description" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="activity-status">Estado</label>
+                    <select id="activity-status">
+                        <option value="pending">Pendiente</option>
+                        <!-- <option value="in-progress">En Progreso</option> --> <!-- Eliminado -->
+                        <option value="completed">Completada</option>
+                    </select>
+                </div>
+
+                <!-- Eliminamos el campo de fecha del modal ya que no corresponde directamente -->
+                <!-- <div class="form-group">
+                    <label for="activity-date">Fecha</label>
+                    <input type="date" id="activity-date" required>
+                </div> -->
+
+                <div class="form-buttons">
+                    <button type="button" class="cancel-button" id="cancel-button">Cancelar</button>
+                    <button type="submit" class="submit-button">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const activityTableBody = document.getElementById('activity-table-body');
+        const emptyState = document.getElementById('empty-state');
+        const activityModal = document.getElementById('activity-modal');
+        const activityForm = document.getElementById('activity-form');
+        const modalTitle = document.getElementById('modal-title');
+        const activityIdInput = document.getElementById('activity-id');
+        const activityNameInput = document.getElementById('activity-name');
+        const activityDescriptionInput = document.getElementById('activity-description');
+        const activityStatusInput = document.getElementById('activity-status');
+        // const activityDateInput = document.getElementById('activity-date'); // Eliminado
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+
+        // Almacenamiento local temporal de actividades cargadas para búsqueda
+        let currentActivities = [];
+        // ID de usuario harcodeado (¡¡REEMPLAZAR CON AUTENTICACIÓN REAL!!)
+        const HARDCODED_USER_ID = 1;
+
+        // Función para mapear estado del backend (boolean) al frontend (string)
+        function mapStatusToFrontend(backendStatus) {
+            return backendStatus ? 'completed' : 'pending';
+        }
+
+        // Función para mapear estado del frontend (string) al backend (boolean)
+        function mapStatusToBackend(frontendStatus) {
+            return frontendStatus === 'completed';
+        }
+
+        // Renderiza la tabla de actividades
+        function renderActivities(activitiesToRender) {
+            activityTableBody.innerHTML = ''; // Limpiar tabla anterior
+
+            if (!activitiesToRender || activitiesToRender.length === 0) {
+                activityTableBody.style.display = 'none';
+                emptyState.style.display = 'flex';
+            } else {
+                activityTableBody.style.display = ''; // Asegura que tbody sea visible
+                emptyState.style.display = 'none';
+
+                activitiesToRender.forEach((activity, index) => {
+                    const tr = document.createElement('tr');
+                    // Aplicar animación con retraso
+                    tr.style.animationDelay = `${index * 0.05}s`;
+
+                    const frontendStatus = mapStatusToFrontend(activity.estado);
+                    let statusClass = '';
+                    let statusText = '';
+
+                    switch(frontendStatus) {
+                        case 'pending':
+                            statusClass = 'status-pending';
+                            statusText = 'Pendiente';
+                            break;
+                        case 'completed':
+                            statusClass = 'status-completed';
+                            statusText = 'Completada';
+                            break;
+                    }
+
+                    // Formato para mostrar la fecha de creación
+                    // El backend devuelve un string ISO 8601 (ej: "2023-10-27T10:00:00")
+                    // Lo convertimos a objeto Date y luego a formato local
+                    const formattedDate = new Date(activity.fecha_creacion).toLocaleDateString();
+
+                    tr.innerHTML = `
+                        <td>${activity.nombre_actividad}</td>
+                        <td class="col-description">${activity.descripcion || ''}</td>
+                        <td><span class="status ${statusClass}">${statusText}</span></td>
+                        <td>${formattedDate}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-button edit-button" data-id="${activity.id_actividad}" title="Editar">✏️</button>
+                                ${!activity.estado ? `<button class="action-button complete-button" data-id="${activity.id_actividad}" title="Completar">✓</button>` : ''}
+                                <button class="action-button delete-button" data-id="${activity.id_actividad}" title="Eliminar">🗑️</button>
+                            </div>
+                        </td>
+                    `;
+
+                    activityTableBody.appendChild(tr);
+                });
+
+                // Re-asignar event listeners después de renderizar
+                addTableButtonListeners();
+            }
+        }
+
+        // Función para asignar listeners a los botones de la tabla
+        function addTableButtonListeners() {
+             document.querySelectorAll('.edit-button').forEach(button => {
+                button.addEventListener('click', () => handleEditClick(button.dataset.id));
+            });
+
+            document.querySelectorAll('.complete-button').forEach(button => {
+                button.addEventListener('click', () => handleCompleteClick(button.dataset.id));
+            });
+
+            document.querySelectorAll('.delete-button').forEach(button => {
+                button.addEventListener('click', () => handleDeleteClick(button.dataset.id));
+            });
+        }
+
+
+        // Función para mostrar el modal
+        function showModal(title = 'Agregar Actividad', activityData = null) {
+            modalTitle.textContent = title;
+            activityForm.reset(); // Limpiar formulario
+            // activityDateInput.valueAsDate = new Date(); // Establecer fecha actual si existiera el campo
+
+            if (activityData) {
+                // Llenar el formulario para editar
+                activityIdInput.value = activityData.id_actividad;
+                activityNameInput.value = activityData.nombre_actividad;
+                activityDescriptionInput.value = activityData.descripcion || '';
+                activityStatusInput.value = mapStatusToFrontend(activityData.estado);
+            } else {
+                // Asegurarse de que el ID esté vacío para agregar
+                activityIdInput.value = '';
+            }
+
+            activityModal.style.display = 'flex';
+            setTimeout(() => {
+                activityModal.classList.add('show');
+            }, 10); // Pequeño delay para la animación
+        }
+
+        // Función para ocultar el modal
+        function hideModal() {
+            activityModal.classList.remove('show');
+            setTimeout(() => {
+                activityModal.style.display = 'none';
+                activityForm.reset();
+                activityIdInput.value = ''; // Asegurar que el ID se limpie
+            }, 300); // Duración de la animación
+        }
+
+        // --- Funciones de API ---
+
+        // Cargar actividades desde el backend
+        async function loadActivities() {
+            try {
+                const response = await fetch('/api/actividades/'); // Usar la ruta API
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const activities = await response.json();
+                currentActivities = activities; // Guardar localmente para búsqueda
+                renderActivities(currentActivities);
+            } catch (error) {
+                console.error('Error al cargar actividades:', error);
+                // Podrías mostrar un mensaje de error al usuario aquí
+                activityTableBody.innerHTML = `<tr><td colspan="5">Error al cargar datos. Intenta recargar la página.</td></tr>`;
+                emptyState.style.display = 'none';
+                activityTableBody.style.display = '';
+            }
+        }
+
+        // Agregar una nueva actividad (POST)
+        async function addActivity(activityData) {
+            try {
+                const response = await fetch('/api/actividades/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(activityData),
+                });
+                if (!response.ok) {
+                     const errorData = await response.json(); // Intenta obtener detalles del error
+                     throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail || 'No details'}`);
+                }
+                // const newActivity = await response.json(); // No es necesario usarla directamente
+                hideModal();
+                loadActivities(); // Recargar la lista completa
+            } catch (error) {
+                console.error('Error al agregar actividad:', error);
+                alert(`Error al agregar: ${error.message}`); // Informar al usuario
+            }
+        }
+
+         // Actualizar una actividad existente (PUT)
+        async function updateActivity(id, activityData) {
+             try {
+                const response = await fetch(`/api/actividades/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(activityData),
+                });
+                 if (!response.ok) {
+                     const errorData = await response.json();
+                     throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail || 'No details'}`);
+                }
+                // const updatedActivity = await response.json(); // No es necesario usarla directamente
+                hideModal();
+                loadActivities(); // Recargar la lista completa
+            } catch (error) {
+                console.error('Error al actualizar actividad:', error);
+                 alert(`Error al actualizar: ${error.message}`); // Informar al usuario
+            }
+        }
+
+         // Eliminar una actividad (DELETE)
+        async function deleteActivity(id) {
+             if (confirm('¿Estás seguro de que deseas eliminar esta actividad?')) {
+                try {
+                    const response = await fetch(`/api/actividades/${id}`, {
+                        method: 'DELETE',
+                    });
+                    if (!response.ok) {
+                         const errorData = await response.json();
+                         throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail || 'No details'}`);
+                    }
+                    // const result = await response.json(); // {mensaje: "..."}
+                    loadActivities(); // Recargar la lista
+                } catch (error) {
+                    console.error('Error al eliminar actividad:', error);
+                    alert(`Error al eliminar: ${error.message}`); // Informar al usuario
+                }
+             }
+        }
+
+         // Marcar como completada (es un caso especial de update)
+        async function completeActivity(id) {
+            // Necesitamos los datos actuales para enviar el PUT completo
+            const activityToComplete = currentActivities.find(a => a.id_actividad == id);
+
+            if (!activityToComplete) {
+                console.error("Actividad no encontrada localmente para completar");
+                alert("Error: No se encontró la actividad.");
+                return;
+            }
+
+             const updatedData = {
+                nombre_actividad: activityToComplete.nombre_actividad,
+                descripcion: activityToComplete.descripcion,
+                estado: true, // Marcar como completada
+                Usuarios_id: activityToComplete.Usuario.id || HARDCODED_USER_ID // Obtener ID del usuario asociado O usar hardcoded
+            };
+
+            await updateActivity(id, updatedData);
+        }
+
+
+        // --- Manejadores de Eventos ---
+
+        // Click en botón Editar de la tabla
+        function handleEditClick(id) {
+             const activityToEdit = currentActivities.find(a => a.id_actividad == id);
+             if (activityToEdit) {
+                showModal('Editar Actividad', activityToEdit);
+             } else {
+                console.error("Actividad no encontrada para editar:", id);
+             }
+        }
+
+         // Click en botón Completar de la tabla
+        function handleCompleteClick(id) {
+             completeActivity(id);
+        }
+
+        // Click en botón Eliminar de la tabla
+        function handleDeleteClick(id) {
+            deleteActivity(id);
+        }
+
+         // Submit del formulario del modal (Agregar o Editar)
+        activityForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const id = activityIdInput.value;
+            const activityData = {
+                nombre_actividad: activityNameInput.value.trim(),
+                descripcion: activityDescriptionInput.value.trim(),
+                estado: mapStatusToBackend(activityStatusInput.value),
+                // ¡¡IMPORTANTE!! Usar ID de usuario harcodeado
+                Usuarios_id: HARDCODED_USER_ID
+            };
+
+             // Validar nombre no vacío
+            if (!activityData.nombre_actividad) {
+                alert("El nombre de la actividad no puede estar vacío.");
+                activityNameInput.focus();
+                return;
+            }
+
+
+            if (id) {
+                // Editar actividad existente
+                updateActivity(id, activityData);
+            } else {
+                // Agregar nueva actividad
+                addActivity(activityData);
+            }
+        });
+
+         // Botones para abrir/cerrar modal
+        document.getElementById('add-activity-button').addEventListener('click', () => showModal());
+        document.getElementById('empty-add-button').addEventListener('click', () => showModal());
+        document.getElementById('close-modal').addEventListener('click', hideModal);
+        document.getElementById('cancel-button').addEventListener('click', hideModal);
+
+        // Búsqueda (filtra los datos cargados localmente)
+         function searchActivities(query) {
+            const lowerCaseQuery = query.toLowerCase().trim();
+            if (!lowerCaseQuery) {
+                renderActivities(currentActivities); // Mostrar todo si la búsqueda está vacía
+                return;
+            }
+
+            const filteredActivities = currentActivities.filter(activity =>
+                (activity.nombre_actividad && activity.nombre_actividad.toLowerCase().includes(lowerCaseQuery)) ||
+                (activity.descripcion && activity.descripcion.toLowerCase().includes(lowerCaseQuery))
+            );
+
+            renderActivities(filteredActivities);
+        }
+
+        searchButton.addEventListener('click', () => {
+            searchActivities(searchInput.value);
+        });
+
+        searchInput.addEventListener('keyup', (e) => {
+            // Buscar mientras se escribe (o con Enter)
+            // if (e.key === 'Enter') {
+                searchActivities(searchInput.value);
+            // }
+        });
+
+
+        // --- Inicialización ---
+        // Cargar las actividades cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', loadActivities);
+
+    </script>
+</body>
+</html>

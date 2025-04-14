@@ -41,7 +41,7 @@ class Usuariomostrar(Usuariobase):
 # Datos de actividad base
 class Actividadesbase(BaseModel):
     nombre_actividad : str
-    descripcion : Optional[str]
+    descripcion : Optional[str] = None
 
 # Datos para creae una actividad
 class Actividadescrear(Actividadesbase):

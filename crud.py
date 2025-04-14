@@ -48,18 +48,19 @@ def obtener_actividades(db: Session):
     return db.query(Actividades).all()
 
 # Funcion para actualizar actividades
-def actualizar_actividad(db: Session, actividad_id: int, datos_actualizados: ActividadesUsuarios):
+def actualizar_actividad(db: Session, actividad_id: int, datos_actualizados: Actividadescrear):
     actividad = db.query(Actividades).filter(Actividades.id_actividad == actividad_id).first()
     if not actividad:
-        return {"mensaje": "Actividad no encontrada"}
-    
+
+         return None
+
     actividad.nombre_actividad = datos_actualizados.nombre_actividad
     actividad.descripcion = datos_actualizados.descripcion
     actividad.estado = datos_actualizados.estado
-    
+
     db.commit()
     db.refresh(actividad)
-    
+
     return actividad
 
 # Eliminar actividad 

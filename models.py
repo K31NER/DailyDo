@@ -20,7 +20,7 @@ class Usuarios(Base):
     contraseña = Column(String(500), nullable= False)
     
     # Relacion uno a muchos
-    Actividades = relationship("Actividades", back_populates="Usuarios")
+    Actividades = relationship("Actividades", back_populates="Usuario")
 
 
 class Actividades(Base):
@@ -36,6 +36,6 @@ class Actividades(Base):
     Usuarios_id = Column(Integer,ForeignKey("Usuarios.id"))
     
     # Relacion 
-    Usuarios = relationship("Usuarios", back_populates="Actividades")
+    Usuario = relationship("Usuarios", back_populates="Actividades")
     
     
